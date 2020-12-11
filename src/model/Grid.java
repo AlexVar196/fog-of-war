@@ -34,6 +34,7 @@ public class Grid {
         // Create player pieces and place in Cell
         for (int j = 0; j < GRID_SIZE; j += 3) {
             createPieces(grid, Constants.GRID_SIZE - 1, j, true);
+            updatProbability(grid, Constants.GRID_SIZE - 1, j, true);
         }
 
         // Create (d/3 - 1) pits randomly for each row in Grid
@@ -48,6 +49,13 @@ public class Grid {
                 }
             }
         }
+    }
+
+    private void updatProbability(Cell[][] grid, int row, int col, boolean isPlayer) {
+        grid[row][col].updatePW(100.0);
+        grid[row][col + 1].updatePH(100.0);
+        grid[row][col + 2].updatePM(100.0);
+
     }
 
     public void createPieces(Cell[][] grid, int row, int col, boolean isPlayer) {
@@ -102,11 +110,11 @@ public class Grid {
                 }
             }
         }
-        if(computerPieces == 0 && playerPieces > computerPieces ) {
+        if (computerPieces == 0 && playerPieces > computerPieces) {
             return "Player Wins!";
-        } else if(playerPieces == 0 && computerPieces > playerPieces) {
+        } else if (playerPieces == 0 && computerPieces > playerPieces) {
             return "CPU Wins!";
-        } else if(computerPieces == 0 && playerPieces == 0) {
+        } else if (computerPieces == 0 && playerPieces == 0) {
             return "Draw!";
         } else {
             return "Game not finished";
@@ -135,11 +143,12 @@ public class Grid {
 
     /**
      * Since only the computer player is using the minimax algorithm, this will
-     * take the perspective of the max player. The evaluation metric will the number of
-     * computer pieces subtracted by the number of user pieces on the board. Max
-     * value would be d for a computer win and -d for a computer loss. According to
-     * the professor, having a different evaluation metric for terminal states compared
-     * to heuristic values can lead to better results (Piazza).
+     * take the perspective of the max player. The evaluation metric will the
+     * number of computer pieces subtracted by the number of user pieces on the
+     * board. Max value would be d for a computer win and -d for a computer
+     * loss. According to the professor, having a different evaluation metric
+     * for terminal states compared to heuristic values can lead to better
+     * results (Piazza).
      */
     public int getEvaluationMetric(Cell[][] state) {
         int playerPieces = 0, computerPieces = 0;
@@ -167,11 +176,11 @@ public class Grid {
         double myScore = 0;
         double enemyScore = 0;
 
-        if(isTerminalState(state)) {
+        if (isTerminalState(state)) {
             String gameStatus = getGameStatus(state);
-            if(gameStatus.equals("Player Wins!")) {
+            if (gameStatus.equals("Player Wins!")) {
                 return -1000;
-            } else if(gameStatus.equals("CPU Wins!")) {
+            } else if (gameStatus.equals("CPU Wins!")) {
                 return 1000;
             }
         }
@@ -334,7 +343,7 @@ public class Grid {
             return new State(getAdvancedHeuristicValue(node), node);
         }
         State bestState = null;
-        if(isMaxPlayer) {
+        if (isMaxPlayer) {
             bestState = new State(Integer.MIN_VALUE, null);
             // Gets all possible child nodes.
             List<Cell[][]> listOfChildNodes = getAllPossibleChildNodes(node, true);
@@ -350,9 +359,9 @@ public class Grid {
             while (!pq.isEmpty()) {
                 Cell[][] child = pq.poll();
                 State state = minimax(child, depth + 1, maxDepth, false);
-                if(bestState == null) {
+                if (bestState == null) {
                     bestState.state = child;
-                } else if(state.heuristicValue > bestState.heuristicValue) {
+                } else if (state.heuristicValue > bestState.heuristicValue) {
                     bestState.heuristicValue = state.heuristicValue;
                     bestState.state = child;
                 }
@@ -373,9 +382,9 @@ public class Grid {
             while (!pl.isEmpty()) {
                 Cell[][] child = pl.poll();
                 State state = minimax(child, depth + 1, maxDepth, true);
-                if(bestState == null) {
+                if (bestState == null) {
                     bestState.state = child;
-                } else if(state.heuristicValue < bestState.heuristicValue) {
+                } else if (state.heuristicValue < bestState.heuristicValue) {
                     bestState.heuristicValue = state.heuristicValue;
                     bestState.state = child;
                 }
@@ -405,9 +414,9 @@ public class Grid {
             while (!pq.isEmpty()) {
                 Cell[][] child = pq.poll();
                 State state = alphaBetaMiniMax(child, depth + 1, alpha, beta, maxDepth, false);
-                if(bestState == null) {
+                if (bestState == null) {
                     bestState.state = child;
-                } else if(state.heuristicValue > bestState.heuristicValue) {
+                } else if (state.heuristicValue > bestState.heuristicValue) {
                     bestState.heuristicValue = state.heuristicValue;
                     bestState.state = child;
                 }
@@ -433,9 +442,9 @@ public class Grid {
             while (!pl.isEmpty()) {
                 Cell[][] child = pl.poll();
                 State state = alphaBetaMiniMax(child, depth + 1, alpha, beta, maxDepth, true);
-                if(bestState == null) {
+                if (bestState == null) {
                     bestState.state = child;
-                } else if(state.heuristicValue < bestState.heuristicValue) {
+                } else if (state.heuristicValue < bestState.heuristicValue) {
                     bestState.heuristicValue = state.heuristicValue;
                     bestState.state = child;
                 }
@@ -449,27 +458,29 @@ public class Grid {
     }
 
     /**
-     * Compare the previous board state with the next board state to find the move that the computer made.
+     * Compare the previous board state with the next board state to find the
+     * move that the computer made.
      *
      * @param currentState The current state of the board
-     * @param nextState The state of the board after the computer makes their move
+     * @param nextState The state of the board after the computer makes their
+     * move
      * @return A string value representing the computer's move
      */
     @Deprecated
     public String findMove(Cell[][] currentState, Cell[][] nextState) {
-        for(int row=0; row<GRID_SIZE; row++) {
-            for(int col=0; col<GRID_SIZE; col++) {
-                if(currentState[row][col].getPiece() != null && nextState[row][col].getPiece() == null) {
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                if (currentState[row][col].getPiece() != null && nextState[row][col].getPiece() == null) {
                     Piece piece = currentState[row][col].getPiece();
                     StringBuilder sb = new StringBuilder();
                     sb.append((char) (col + 97));
                     sb.append((char) (row + 49));
                     sb.append(" ");
-                    for(int i=0; i<GRID_SIZE; i++) {
-                        for(int j=0; j<GRID_SIZE; j++) {
+                    for (int i = 0; i < GRID_SIZE; i++) {
+                        for (int j = 0; j < GRID_SIZE; j++) {
                             Piece nextStatePiece = nextState[i][j].getPiece();
-                            if(piece.isSameType(nextStatePiece) && piece.isPlayer() == nextStatePiece.isPlayer() &&
-                                    (currentState[i][j].getPiece() == null || nextStatePiece.canAttack(currentState[i][j].getPiece()))) {
+                            if (piece.isSameType(nextStatePiece) && piece.isPlayer() == nextStatePiece.isPlayer()
+                                    && (currentState[i][j].getPiece() == null || nextStatePiece.canAttack(currentState[i][j].getPiece()))) {
                                 sb.append((char) (j + 97));
                                 sb.append((char) (i + 49));
                                 return sb.toString();

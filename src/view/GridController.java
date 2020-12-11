@@ -76,6 +76,7 @@ public class GridController implements Serializable {
                                 text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
                             }
                             addPlayerObservations(board, currCell, 'w');
+                            currCell.updatePW(100.0);
                         } else if (currCell.getPiece() instanceof Hero) {
                             if (!fogOfWar) {
                                 text = new Text("Hero");
@@ -83,6 +84,7 @@ public class GridController implements Serializable {
                                 text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
                             }
                             addPlayerObservations(board, currCell, 'h');
+                            currCell.updatePH(100.0);
                         } else if (currCell.getPiece() instanceof Mage) {
                             if (!fogOfWar) {
                                 text = new Text("Mage");
@@ -90,6 +92,7 @@ public class GridController implements Serializable {
                                 text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
                             }
                             addPlayerObservations(board, currCell, 'm');
+                            currCell.updatePM(100.0);
                         }
                     } else {
                         if (currCell.getPiece() instanceof Wumpus) {
@@ -149,31 +152,47 @@ public class GridController implements Serializable {
                 String heat = "";
                 String breeze = "";
                 Boolean changed = false;
+                String finalString = "";
 
                 if (currCell.isStench()) {
-                    stench = "\nStench";
+                    stench = "Stench, ";
                     changed = true;
                 }
                 if (currCell.isNoise()) {
-                    noise = "\nNoise";
+                    noise = "Noise, ";
                     changed = true;
                 }
                 if (currCell.isHeat()) {
-                    heat = "\nHeat";
+                    heat = "Heat, ";
                     changed = true;
                 }
                 if (currCell.isBreeze()) {
-                    breeze = "\nBreeze";
+                    breeze = "Breeze, ";
                     changed = true;
                 }
 
                 if (changed) {
-                    Tooltip toolTip = new Tooltip("Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations:" + stench + noise + heat + breeze);
-                    Tooltip.install(currCell, toolTip);
+                    finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: " + stench + noise + heat + breeze;
+
                 } else {
-                    Tooltip toolTip = new Tooltip("Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None");
-                    Tooltip.install(currCell, toolTip);
+                    if (currCell.getPiece() != null && !currCell.getPiece().isPlayer()) {
+                        finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None\nEmpty Cell: 100%";
+                    } else {
+                        finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None";
+                    }
                 }
+
+                if (currCell.getPiece() != null && currCell.getPiece().isPlayer()) {
+                    finalString = finalString + "\nThat's our unit";
+                } else {
+                    finalString = finalString + "\nPW: " + currCell.getPW() + "%";
+                    finalString = finalString + "\nPH: " + currCell.getPH() + "%";
+                    finalString = finalString + "\nPM: " + currCell.getPM() + "%";
+                    finalString = finalString + "\nPP: " + currCell.getPP() + "%";
+                }
+                Tooltip toolTip = new Tooltip(finalString);
+                Tooltip.install(currCell, toolTip);
+
             }
         }
         gridPane.getStyleClass().add("grid");

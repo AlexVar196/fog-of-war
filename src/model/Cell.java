@@ -16,6 +16,11 @@ public class Cell extends StackPane {
     private boolean isComputerObservedHeat;
     private boolean isComputerObservedBreeze;
 
+    private double pW = 0.0;
+    private double pH = 0.0;
+    private double pM = 0.0;
+    private double pP = 0.0;
+
     public Cell(Coords coords) {
         this.coords = coords;
     }
@@ -26,6 +31,38 @@ public class Cell extends StackPane {
 
     public Piece getPiece() {
         return this.piece;
+    }
+
+    public void updatePW(double p) {
+        this.pW = p;
+    }
+
+    public void updatePH(double p) {
+        this.pH = p;
+    }
+
+    public void updatePM(double p) {
+        this.pM = p;
+    }
+
+    public void updatePP(double p) {
+        this.pP = p;
+    }
+
+    public double getPW() {
+        return this.pW;
+    }
+
+    public double getPH() {
+        return this.pH;
+    }
+
+    public double getPM() {
+        return this.pM;
+    }
+
+    public double getPP() {
+        return this.pP;
     }
 
     public boolean isPit() {
@@ -147,4 +184,5 @@ public class Cell extends StackPane {
         this.isComputerObservedNoise = false;
         this.isComputerObservedStench = false;
     }
+
 }
