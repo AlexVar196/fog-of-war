@@ -8,6 +8,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import model.*;
 import model.Cell;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -144,6 +146,43 @@ public class GridController implements Serializable {
             }
         }
 
+        calculateProbabilities(board);
+        updateToolTip(board);
+        gridPane.getStyleClass().add("grid");
+    }
+
+    private void calculateProbabilities(Cell[][] board) {
+        updatePitProbability(board);
+
+    }
+
+    private void updatePitProbability(Cell[][] board) {
+        List<Cell> nonPlayerCells = new ArrayList<>();
+        for (int row = 0; row < Constants.GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                Cell currCell = board[row][col];
+                if (currCell.getPiece() == null) {
+                    nonPlayerCells.add(currCell);
+                }
+            }
+        }
+        double numOfPits = ((Constants.GRID_SIZE / 3) - 1) * (GRID_SIZE - 2);
+        System.out.println("view.GridController.updatePitProbability() pits " + numOfPits);
+        double numberOfEmptyCells = nonPlayerCells.size();
+        System.out.println("view.GridController.updatePitProbability() numberOfEmptyCells " + numberOfEmptyCells);
+        double p = (numOfPits / numberOfEmptyCells) * 100;
+
+        System.out.println("view.GridController.updatePitProbability() p " + p);
+
+        BigDecimal bd = new BigDecimal(p).setScale(3, RoundingMode.HALF_UP);
+        double roundedP = bd.doubleValue();
+
+        for (Cell cell : nonPlayerCells) {
+            cell.updatePP(roundedP);
+        }
+    }
+
+    private void updateToolTip(Cell[][] board) {
         for (int row = 0; row < Constants.GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
                 Cell currCell = board[row][col];
@@ -195,9 +234,6 @@ public class GridController implements Serializable {
 
             }
         }
-        gridPane.getStyleClass().add("grid");
-        //diplayBoardLogs();
-
     }
 
     public void toggleFogOfWar() {
