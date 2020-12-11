@@ -11,47 +11,53 @@
 <?import javafx.scene.text.Font?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1000.0" prefWidth="1600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.GridController">
-   <children>
-      <GridPane fx:id="gridPane" layoutX="269.0" layoutY="65.0" prefHeight="222.0" prefWidth="219.0">
-        <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="75.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="75.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="75.0" prefWidth="100.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints maxHeight="75.0" minHeight="75.0" prefHeight="75.0" vgrow="NEVER" />
-            <RowConstraints maxHeight="75.0" minHeight="75.0" prefHeight="75.0" vgrow="NEVER" />
-            <RowConstraints maxHeight="75.0" minHeight="75.0" prefHeight="75.0" vgrow="NEVER" />
-        </rowConstraints>
-      </GridPane>
-      <TextField fx:id="inputTextField" layoutX="14.0" layoutY="178.0" promptText="e.g. a1 a2" />
-      <Label layoutX="17.0" layoutY="160.0" text="Input Move" />
-      <Button fx:id="submitButton" layoutX="170.0" layoutY="178.0" mnemonicParsing="false" onMouseClicked="#submitMove" prefHeight="17.0" prefWidth="62.0" text="Submit" />
-      <TextArea fx:id="outputTextArea" layoutX="14.0" layoutY="215.0" prefHeight="79.0" prefWidth="219.0" />
-      <Label fx:id="gameStatusLabel" layoutX="96.0" layoutY="81.0">
+    <children>
+        <GridPane fx:id="gridPane" layoutX="269.0" layoutY="65.0" prefHeight="222.0" prefWidth="219.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="75.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="75.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="75.0" minWidth="75.0" prefWidth="100.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints maxHeight="75.0" minHeight="75.0" prefHeight="75.0" vgrow="NEVER" />
+                <RowConstraints maxHeight="75.0" minHeight="75.0" prefHeight="75.0" vgrow="NEVER" />
+                <RowConstraints maxHeight="75.0" minHeight="75.0" prefHeight="75.0" vgrow="NEVER" />
+            </rowConstraints>
+        </GridPane>
+        <TextField fx:id="inputTextField" layoutX="14.0" layoutY="178.0" promptText="e.g. a1 a2" />
+        <Label layoutX="17.0" layoutY="160.0" text="Input Move" />
+        <Button fx:id="submitButton" layoutX="170.0" layoutY="178.0" mnemonicParsing="false" onMouseClicked="#submitMove" prefHeight="17.0" prefWidth="62.0" text="Submit" />
+        <TextArea fx:id="outputTextArea" layoutX="14.0" layoutY="215.0" prefHeight="79.0" prefWidth="219.0" />
+        <Button fx:id="fogButton" layoutX="14.0" layoutY="304.0" mnemonicParsing="false" onMouseClicked="#toggleFogOfWar" prefHeight="17.0" prefWidth="102.0" text="Fog Of War" />
+        <Label fx:id="fogOfWarToggleText" layoutX="137.0" layoutY="308.0" text="ON" textFill="GREEN">
          <font>
-            <Font size="24.0" />
+                <Font name="System Bold" size="14.0" />
          </font>
-      </Label>
-      <Label layoutX="103.0" layoutY="366.0" text="Legend">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Label>
-      <Label layoutX="67.0" layoutY="392.0" text="Red" textFill="RED">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Label>
-      <Label layoutX="96.0" layoutY="392.0" text="→ CPU" />
-      <Label layoutX="67.0" layoutY="416.0" text="Blue" textFill="#006dff">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Label>
-      <Label layoutX="96.0" layoutY="416.0" text="→ Player" />
-      <Label layoutX="67.0" layoutY="440.0" text="Wumpus beats Mage" />
-      <Label layoutX="67.0" layoutY="464.0" text="Mage beats Hero" />
-      <Label layoutX="67.0" layoutY="488.0" text="Hero beats Wumpus" />
-   </children>
+        </Label>
+        <Label fx:id="gameStatusLabel" layoutX="96.0" layoutY="81.0">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+        <Label layoutX="103.0" layoutY="366.0" text="Legend">
+            <font>
+                <Font name="System Bold" size="12.0" />
+            </font>
+        </Label>
+        <Label layoutX="67.0" layoutY="392.0" text="Red" textFill="RED">
+            <font>
+                <Font name="System Bold" size="12.0" />
+            </font>
+        </Label>
+        <Label layoutX="96.0" layoutY="392.0" text="→ CPU" />
+        <Label layoutX="67.0" layoutY="416.0" text="Blue" textFill="#006dff">
+            <font>
+                <Font name="System Bold" size="12.0" />
+            </font>
+        </Label>
+        <Label layoutX="96.0" layoutY="416.0" text="→ Player" />
+        <Label layoutX="67.0" layoutY="440.0" text="Wumpus beats Mage" />
+        <Label layoutX="67.0" layoutY="464.0" text="Mage beats Hero" />
+        <Label layoutX="67.0" layoutY="488.0" text="Hero beats Wumpus" />
+    </children>
 </AnchorPane>

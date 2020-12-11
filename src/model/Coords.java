@@ -18,6 +18,10 @@ public class Coords {
         return this.row;
     }
 
+    public String toString() {
+        return "col: " + this.column + " row: " + this.row + "";
+    }
+
     public boolean equals(Coords c) {
         return this.row == c.getRow() && this.column == c.getColumn();
     }

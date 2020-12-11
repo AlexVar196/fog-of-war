@@ -7,6 +7,14 @@ public class Cell extends StackPane {
     private Coords coords;
     private Piece piece;
     private boolean isPit;
+    private boolean isPlayesObservedStench;
+    private boolean isPlayerObservedNoise;
+    private boolean isPlayerObservedHeat;
+    private boolean isPlayerObservedBreeze;
+    private boolean isComputerObservedStench;
+    private boolean isComputerObservedNoise;
+    private boolean isComputerObservedHeat;
+    private boolean isComputerObservedBreeze;
 
     public Cell(Coords coords) {
         this.coords = coords;
@@ -28,6 +36,70 @@ public class Cell extends StackPane {
         this.isPit = isPit;
     }
 
+    public boolean isHeat() {
+        return this.isPlayerObservedHeat;
+    }
+
+    public void setIsHeat(boolean isHeat) {
+        this.isPlayerObservedHeat = isHeat;
+    }
+
+    public boolean isCPUHeat() {
+        return this.isComputerObservedHeat;
+    }
+
+    public void setIsCPUHeat(boolean isHeat) {
+        this.isComputerObservedHeat = isHeat;
+    }
+
+    public boolean isCPUStench() {
+        return this.isComputerObservedStench;
+    }
+
+    public void setIsCPUStench(boolean isStench) {
+        this.isComputerObservedStench = isStench;
+    }
+
+    public boolean isCPUNoise() {
+        return this.isComputerObservedNoise;
+    }
+
+    public void setIsCPUNoise(boolean isNoise) {
+        this.isComputerObservedNoise = isNoise;
+    }
+
+    public boolean isStench() {
+        return this.isPlayesObservedStench;
+    }
+
+    public void setIsStench(boolean isStench) {
+        this.isPlayesObservedStench = isStench;
+    }
+
+    public boolean isNoise() {
+        return this.isPlayerObservedNoise;
+    }
+
+    public void setIsNoise(boolean isNoise) {
+        this.isPlayerObservedNoise = isNoise;
+    }
+
+    public boolean isCPUBreeze() {
+        return this.isComputerObservedBreeze;
+    }
+
+    public void setIsCPUBreeze(boolean isBreeze) {
+        this.isComputerObservedBreeze = isBreeze;
+    }
+
+    public boolean isBreeze() {
+        return this.isPlayerObservedBreeze;
+    }
+
+    public void setIsBreeze(boolean isBreeze) {
+        this.isPlayerObservedBreeze = isBreeze;
+    }
+
     public Coords getCoords() {
         return this.coords;
     }
@@ -37,14 +109,14 @@ public class Cell extends StackPane {
         int sourceCol = this.coords.getColumn();
         int targetRow = target.getCoords().getRow();
         int targetCol = target.getCoords().getColumn();
-        if(piece == null) {
+        if (piece == null) {
             return false;
         } else {
             boolean validColumn = targetCol == sourceCol || targetCol == sourceCol + 1 || targetCol == sourceCol - 1;
             boolean validRow = targetRow == sourceRow || targetRow == sourceRow + 1 || targetRow == sourceRow - 1;
-            if(validRow && validColumn && !coords.equals(target.coords)) {
+            if (validRow && validColumn && !coords.equals(target.coords)) {
                 Piece targetPiece = target.getPiece();
-                if(targetPiece == null || piece.canAttack(targetPiece) || piece.diesTo(targetPiece)) {
+                if (targetPiece == null || piece.canAttack(targetPiece) || piece.diesTo(targetPiece)) {
                     return true;
                 } else {
                     return false;
@@ -57,10 +129,22 @@ public class Cell extends StackPane {
 
     public Cell getCopy() {
         Cell copy = new Cell(coords.getCopy());
-        if(piece != null) {
+        if (piece != null) {
             copy.setPiece(piece.getCopy());
         }
         copy.setIsPit(isPit);
         return copy;
+    }
+
+    public void resetPlayerObservations() {
+        this.isPlayerObservedHeat = false;
+        this.isPlayerObservedNoise = false;
+        this.isPlayesObservedStench = false;
+    }
+
+    public void resetComputerObservations() {
+        this.isComputerObservedHeat = false;
+        this.isComputerObservedNoise = false;
+        this.isComputerObservedStench = false;
     }
 }
