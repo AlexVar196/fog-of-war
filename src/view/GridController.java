@@ -39,7 +39,7 @@ public class GridController implements Serializable {
     transient Button submitButton;
 
     private Grid grid;
-    private Boolean fogOfWar = false;
+    private Boolean fogOfWar = true;
 
     public void start(Grid grid) {
         this.grid = grid;
@@ -112,6 +112,18 @@ public class GridController implements Serializable {
                         text.setFill(color);
                     }
                     currCell.getChildren().addAll(new Rectangle(), text);
+                } else if (currCell.isPit()) {
+                    if (!fogOfWar) {
+                        text = new Text("Pit");
+                        text.setStyle("-fx-font-weight: bold");
+                    } else {
+                        text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
+                    }
+                    addComputerObservations(board, currCell, 'p');
+                    addPlayerObservations(board, currCell, 'p');
+
+                    currCell.getChildren().addAll(new Rectangle(), text);
+
                 } else if (!currCell.isPit()) {
                     text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
                     Color color = Color.BLACK;
@@ -121,18 +133,7 @@ public class GridController implements Serializable {
                     currCell.resetPlayerObservations();
                     currCell.resetComputerObservations();
                 }
-                if (currCell.isPit()) {
-                    if (!fogOfWar) {
-                        text = new Text("Pit");
-                        text.setStyle("-fx-font-weight: bold");
-                    } else {
-                        text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
-                    }
 
-                    currCell.getChildren().addAll(new Rectangle(), text);
-                    addComputerObservations(board, currCell, 'p');
-                    addPlayerObservations(board, currCell, 'p');
-                }
                 GridPane.setRowIndex(currCell, row);
                 GridPane.setColumnIndex(board[row][col], col);
                 currCell.getStyleClass().add("cell");
@@ -146,26 +147,37 @@ public class GridController implements Serializable {
                 String stench = "";
                 String noise = "";
                 String heat = "";
+                String breeze = "";
+                Boolean changed = false;
 
                 if (currCell.isStench()) {
                     stench = "\nStench";
+                    changed = true;
                 }
                 if (currCell.isNoise()) {
                     noise = "\nNoise";
+                    changed = true;
                 }
                 if (currCell.isHeat()) {
                     heat = "\nHeat";
+                    changed = true;
                 }
-                if (currCell.isPit()) {
-                    heat = "\nBreeze";
+                if (currCell.isBreeze()) {
+                    breeze = "\nBreeze";
+                    changed = true;
                 }
 
-                Tooltip toolTip = new Tooltip("Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + stench + noise + heat);
-                Tooltip.install(currCell, toolTip);
+                if (changed) {
+                    Tooltip toolTip = new Tooltip("Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations:" + stench + noise + heat + breeze);
+                    Tooltip.install(currCell, toolTip);
+                } else {
+                    Tooltip toolTip = new Tooltip("Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None");
+                    Tooltip.install(currCell, toolTip);
+                }
             }
         }
         gridPane.getStyleClass().add("grid");
-        diplayBoardLogs();
+        //diplayBoardLogs();
 
     }
 
