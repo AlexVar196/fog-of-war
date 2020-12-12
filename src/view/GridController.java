@@ -188,46 +188,58 @@ public class GridController implements Serializable {
         Boolean changed = false;
         String finalString = "";
 
+        List<String> observations = new ArrayList<>();
+
         if (currCell.isStench()) {
-            stench = "Stench, ";
+            stench = "Stench";
+            observations.add(stench);
             changed = true;
         }
         if (currCell.isNoise()) {
-            noise = "Noise, ";
+            noise = "Noise";
+            observations.add(noise);
             changed = true;
         }
         if (currCell.isHeat()) {
-            heat = "Heat, ";
+            heat = "Heat";
+            observations.add(heat);
             changed = true;
         }
         if (currCell.isBreeze()) {
-            breeze = "Breeze, ";
+            breeze = "Breeze";
+            observations.add(breeze);
             changed = true;
         }
 
         if (changed) {
-            finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: " + stench + noise + heat + breeze;
+            String observationsText = "";
+            for (int i = 0; i < observations.size(); i++) {
+                if (i != observations.size()-1) {
+                    observationsText += (observations.get(i) + ", ");
+                } else {
+                    observationsText += (observations.get(i) + ". ");
+                }
+            }
+            
+            System.err.println(observationsText);
+            finalString = "Cell: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: " + observationsText;
 
         } else {
             if (currCell.getPiece() != null && !currCell.getPiece().isPlayer()) {
-                finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None\nEmpty Cell: 100%";
+                finalString = "Cell: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None\nEmpty Cell: 100%";
             } else {
-                finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None";
+                finalString = "Cell: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None.";
             }
         }
         return finalString;
     }
 
     private String getProbabilityText(Cell currCell) {
-        String probabilityText = "";
-        if (currCell.getPiece() != null && currCell.getPiece().isPlayer()) {
-            probabilityText = probabilityText + "\nThat's our unit";
-        } else {
-            probabilityText = probabilityText + "\nPW: " + currCell.getPW() + "%";
-            probabilityText = probabilityText + "\nPH: " + currCell.getPH() + "%";
-            probabilityText = probabilityText + "\nPM: " + currCell.getPM() + "%";
-            probabilityText = probabilityText + "\nPP: " + currCell.getPP() + "%";
-        }
+        String probabilityText = "\nPW: " + currCell.getPW() + "%";
+        probabilityText += "\nPH: " + currCell.getPH() + "%";
+        probabilityText += "\nPM: " + currCell.getPM() + "%";
+        probabilityText += "\nPP: " + currCell.getPP() + "%";
+
         return probabilityText;
     }
 
@@ -241,21 +253,21 @@ public class GridController implements Serializable {
                     Tooltip toolTip = new Tooltip(observationText);
                     Tooltip.install(currCell, toolTip);
 
-                    var surroundingCells = getSurroundingCells(board, currCell);
-                    for (Cell cell : surroundingCells) {
-                        String surroundingObservationText = getCellObservations(cell);
-                        String surroundingProbabilityText = getProbabilityText(cell);
-                        String finalTooltipText = surroundingObservationText + surroundingProbabilityText;
-
-                        System.out.println(finalTooltipText);
-
-                        Tooltip surroundingToolTip = new Tooltip(finalTooltipText);
-                        Tooltip.install(cell, surroundingToolTip);
-                    }
+//                    var surroundingCells = getSurroundingCells(board, currCell);
+//                    for (Cell cell : surroundingCells) {
+//                        String surroundingObservationText = getCellObservations(cell);
+//                        String surroundingProbabilityText = getProbabilityText(cell);
+//                        String finalTooltipText = surroundingObservationText + surroundingProbabilityText;
+//
+//                        System.out.println(finalTooltipText);
+//
+//                        Tooltip surroundingToolTip = new Tooltip(finalTooltipText);
+//                        Tooltip.install(cell, surroundingToolTip);
+//                    }
                 } else {
-                    String observationText = "Observation out of sight";
+                    String cellText = "Cell: " + String.valueOf((char) (col + 65)) + "-" + (row + 1);
                     String probabilityText = getProbabilityText(currCell);
-                    String finalTooltipText = observationText + probabilityText;
+                    String finalTooltipText = cellText + probabilityText;
 
                     Tooltip toolTip = new Tooltip(finalTooltipText);
                     Tooltip.install(currCell, toolTip);

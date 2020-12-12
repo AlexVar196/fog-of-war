@@ -3,7 +3,7 @@ package model;
 public class Constants {
 
     // The value of d. GRID_SIZE must be a multiple of 3
-    public static final int GRID_SIZE = 6;
+    public static final int GRID_SIZE = 3;
 
     // Each Cell is a StackPane represented in the Grid (GridPane).
     // The Cell size determines the width/height of the StackPane in pixels.
