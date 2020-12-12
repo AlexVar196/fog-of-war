@@ -185,4 +185,11 @@ public class Cell extends StackPane {
         this.isComputerObservedStench = false;
     }
 
+    public void resetProbabilities() {
+        this.pH = 0.0;
+        this.pW = 0.0;
+        this.pM = 0.0;
+        this.pW = 0.0;
+    }
+
 }

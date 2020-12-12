@@ -43,12 +43,21 @@ public class GridController implements Serializable {
     private Grid grid;
     private Boolean fogOfWar = true;
 
+    int myWumps = 0;
+    int enemyWumps = 0;
+    int myHeroes = 0;
+    int enemyHeroes = 0;
+    int myMages = 0;
+    int enemyMages = 0;
+
     public void start(Grid grid) {
         this.grid = grid;
         refreshGrid();
     }
 
     public void refreshGrid() {
+        resetUnitCounter();
+
         if (fogOfWar) {
             fogOfWarToggleText.setText("ON");
             Color color = Color.GREEN;
@@ -72,38 +81,44 @@ public class GridController implements Serializable {
                 if (currCell.getPiece() != null) {
                     if (!currCell.getPiece().isPlayer()) {
                         if (currCell.getPiece() instanceof Wumpus) {
+                            enemyWumps++;
                             if (!fogOfWar) {
                                 text = new Text("Wumpus");
                             } else {
                                 text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
                             }
                             addPlayerObservations(board, currCell, 'w');
-                            currCell.updatePW(100.0);
+                            //currCell.updatePW(100.0);
                         } else if (currCell.getPiece() instanceof Hero) {
+                            enemyHeroes++;
                             if (!fogOfWar) {
                                 text = new Text("Hero");
                             } else {
                                 text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
                             }
                             addPlayerObservations(board, currCell, 'h');
-                            currCell.updatePH(100.0);
+                            //currCell.updatePH(100.0);
                         } else if (currCell.getPiece() instanceof Mage) {
+                            enemyMages++;
                             if (!fogOfWar) {
                                 text = new Text("Mage");
                             } else {
                                 text = new Text(String.valueOf((char) (col + 65)) + "" + (row + 1));
                             }
                             addPlayerObservations(board, currCell, 'm');
-                            currCell.updatePM(100.0);
+                            //currCell.updatePM(100.0);
                         }
                     } else {
                         if (currCell.getPiece() instanceof Wumpus) {
+                            myWumps++;
                             text = new Text("Wumpus");
                             addComputerObservations(board, currCell, 'w');
                         } else if (currCell.getPiece() instanceof Hero) {
+                            myHeroes++;
                             text = new Text("Hero");
                             addComputerObservations(board, currCell, 'h');
                         } else if (currCell.getPiece() instanceof Mage) {
+                            myMages++;
                             text = new Text("Mage");
                             addComputerObservations(board, currCell, 'm');
                         }
@@ -146,43 +161,139 @@ public class GridController implements Serializable {
             }
         }
 
+        //addObservations(board);
         calculateProbabilities(board);
         updateToolTip(board);
         gridPane.getStyleClass().add("grid");
     }
 
+//    private void addObservations(Cell[][] board) {
+//        for (int row = 0; row < Constants.GRID_SIZE; row++) {
+//            for (int col = 0; col < GRID_SIZE; col++) {
+//                Cell currCell = board[row][col];
+//                if (currCell.getPiece() != null) {
+//                    if (currCell.getPiece().isPlayer()) {
+//                        List<Cell> surroundingCells = getSurroundingCells(board, currCell);
+//                        for (Cell cell : surroundingCells) {
+//                            if (cell.isStench()) {
+//                                addComputerObservations(board, currCell, 'w');
+//                            }
+//                            if (cell.isNoise()) {
+//                                addComputerObservations(board, currCell, 'h');
+//                            }
+//                            if (cell.isHeat()) {
+//                                addComputerObservations(board, currCell, 'm');
+//                            }
+//                            if (cell.isBreeze()) {
+//                                addComputerObservations(board, currCell, 'p');
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
     private void calculateProbabilities(Cell[][] board) {
         updatePitProbability(board);
+        updatePiecesProbability(board);
+    }
 
+    private void resetProbabilities() {
+        Cell[][] board = grid.getGrid();
+        for (int row = 0; row < Constants.GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                Cell currCell = board[row][col];
+                currCell.resetProbabilities();
+            }
+        }
+    }
+
+    private void updatePiecesProbability(Cell[][] board) {
+
+        for (int row = 0; row < Constants.GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                Cell currCell = board[row][col];
+                if (currCell.getPiece() != null) {
+                    if (currCell.getPiece().isPlayer()) {
+                        List<Cell> surroundingCells = getSurroundingCells(board, currCell);
+                        int numOfEmptyCells = 0;
+                        for (Cell cell : surroundingCells) {
+                            if (cell.getPiece() == null || !cell.getPiece().isPlayer() || cell.isPit()) {
+                                numOfEmptyCells++;
+                            }
+                        }
+
+                        if (currCell.isStench()) {
+                            List<Double> probabilities = new ArrayList<>();
+                            for (int i = 1; i <= enemyWumps; i++) {
+                                probabilities.add((1.0 / numOfEmptyCells) * 100);
+                            }
+
+                            double p = 0;
+                            for (double probability : probabilities) {
+                                p += probability;
+                            }
+                            p = p / probabilities.size();
+                            for (Cell cell : surroundingCells) {
+                                cell.updatePW(p);
+                            }
+                        }
+
+                        if (currCell.isNoise()) {
+                            List<Double> probabilities = new ArrayList<>();
+                            for (int i = 1; i <= enemyHeroes; i++) {
+                                probabilities.add(1.0 / numOfEmptyCells);
+                            }
+
+                            double p = 0;
+                            for (double probability : probabilities) {
+                                p += probability;
+                            }
+                            p = p / probabilities.size();
+                            for (Cell cell : surroundingCells) {
+                                cell.updatePH(p);
+                            }
+                        }
+
+                        if (currCell.isHeat()) {
+                            List<Double> probabilities = new ArrayList<>();
+                            for (int i = 1; i <= enemyMages; i++) {
+                                probabilities.add(1.0 / numOfEmptyCells);
+                            }
+
+                            double p = 0;
+                            for (double probability : probabilities) {
+                                p += probability;
+                            }
+                            p = p / probabilities.size();
+                            for (Cell cell : surroundingCells) {
+                                cell.updatePM(p);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void updatePitProbability(Cell[][] board) {
         for (int row = 0; row < Constants.GRID_SIZE; row++) {
-            List<Cell> EmptyCellsInRow = new ArrayList<>();
+            List<Cell> emptyCellsInRow = new ArrayList<>();
             for (int col = 0; col < GRID_SIZE; col++) {
                 Cell currCell = board[row][col];
                 if (currCell.getPiece() == null) {
-                    EmptyCellsInRow.add(currCell);
+                    emptyCellsInRow.add(currCell);
                     double numOfPitsPerRow = ((Constants.GRID_SIZE / 3) - 1);
-                    double numberOfEmptyCellsInRow = EmptyCellsInRow.size();
+                    double numberOfEmptyCellsInRow = emptyCellsInRow.size();
                     double p = (numOfPitsPerRow / numberOfEmptyCellsInRow) * 100;
                     BigDecimal bd = new BigDecimal(p).setScale(3, RoundingMode.HALF_UP);
                     double roundedP = bd.doubleValue();
-                    for (Cell cell : EmptyCellsInRow) {
+                    for (Cell cell : emptyCellsInRow) {
                         cell.updatePP(roundedP);
                     }
                 }
             }
         }
-//
-//        double p = (numOfPits / numberOfEmptyCells) * 100;
-//
-//        BigDecimal bd = new BigDecimal(p).setScale(3, RoundingMode.HALF_UP);
-//        double roundedP = bd.doubleValue();
-//
-//        for (Cell cell : nonPlayerCells) {
-//            cell.updatePP(roundedP);
-//        }
     }
 
     private String getCellObservations(Cell currCell) {
@@ -228,7 +339,6 @@ public class GridController implements Serializable {
                 }
             }
 
-            System.err.println(observationsText);
             finalString = "Cell: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: " + observationsText;
 
         } else {
@@ -326,6 +436,7 @@ public class GridController implements Serializable {
             } else {
                 if (grid.executeMove(new Coords(startRow, startCol), new Coords(endRow, endCol))) {
                     String output = String.format("Human moved from [%s] to [%s]\n", input[0], input[1]);
+                    resetProbabilities();
                     refreshGrid();
                     if (grid.isTerminalState(grid.getGrid())) {
                         gameStatusLabel.setText(grid.getGameStatus());
@@ -505,5 +616,14 @@ public class GridController implements Serializable {
             }
         }
         return allSurroundingCells;
+    }
+
+    private void resetUnitCounter() {
+        this.myWumps = 0;
+        this.enemyWumps = 0;
+        this.myHeroes = 0;
+        this.enemyHeroes = 0;
+        this.myMages = 0;
+        this.enemyMages = 0;
     }
 }

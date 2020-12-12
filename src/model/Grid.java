@@ -29,12 +29,12 @@ public class Grid {
         // Create computer pieces and place in Cell
         for (int j = 0; j < GRID_SIZE; j += 3) {
             createPieces(grid, 0, j, false);
+            updatProbability(grid, 0, j);
         }
 
         // Create player pieces and place in Cell
         for (int j = 0; j < GRID_SIZE; j += 3) {
             createPieces(grid, Constants.GRID_SIZE - 1, j, true);
-            updatProbability(grid, Constants.GRID_SIZE - 1, j, true);
         }
 
         // Create (d/3 - 1) pits randomly for each row in Grid
@@ -51,11 +51,10 @@ public class Grid {
         }
     }
 
-    private void updatProbability(Cell[][] grid, int row, int col, boolean isPlayer) {
+    private void updatProbability(Cell[][] grid, int row, int col) {
         grid[row][col].updatePW(100.0);
         grid[row][col + 1].updatePH(100.0);
         grid[row][col + 2].updatePM(100.0);
-
     }
 
     public void createPieces(Cell[][] grid, int row, int col, boolean isPlayer) {
