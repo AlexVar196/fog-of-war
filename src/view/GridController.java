@@ -157,25 +157,32 @@ public class GridController implements Serializable {
     }
 
     private void updatePitProbability(Cell[][] board) {
-        List<Cell> nonPlayerCells = new ArrayList<>();
         for (int row = 0; row < Constants.GRID_SIZE; row++) {
+            List<Cell> EmptyCellsInRow = new ArrayList<>();
             for (int col = 0; col < GRID_SIZE; col++) {
                 Cell currCell = board[row][col];
                 if (currCell.getPiece() == null) {
-                    nonPlayerCells.add(currCell);
+                    EmptyCellsInRow.add(currCell);
+                    double numOfPitsPerRow = ((Constants.GRID_SIZE / 3) - 1);
+                    double numberOfEmptyCellsInRow = EmptyCellsInRow.size();
+                    double p = (numOfPitsPerRow / numberOfEmptyCellsInRow) * 100;
+                    BigDecimal bd = new BigDecimal(p).setScale(3, RoundingMode.HALF_UP);
+                    double roundedP = bd.doubleValue();
+                    for (Cell cell : EmptyCellsInRow) {
+                        cell.updatePP(roundedP);
+                    }
                 }
             }
         }
-        double numOfPits = ((Constants.GRID_SIZE / 3) - 1) * (GRID_SIZE - 2);
-        double numberOfEmptyCells = nonPlayerCells.size();
-        double p = (numOfPits / numberOfEmptyCells) * 100;
-
-        BigDecimal bd = new BigDecimal(p).setScale(3, RoundingMode.HALF_UP);
-        double roundedP = bd.doubleValue();
-
-        for (Cell cell : nonPlayerCells) {
-            cell.updatePP(roundedP);
-        }
+//
+//        double p = (numOfPits / numberOfEmptyCells) * 100;
+//
+//        BigDecimal bd = new BigDecimal(p).setScale(3, RoundingMode.HALF_UP);
+//        double roundedP = bd.doubleValue();
+//
+//        for (Cell cell : nonPlayerCells) {
+//            cell.updatePP(roundedP);
+//        }
     }
 
     private String getCellObservations(Cell currCell) {
@@ -214,13 +221,13 @@ public class GridController implements Serializable {
         if (changed) {
             String observationsText = "";
             for (int i = 0; i < observations.size(); i++) {
-                if (i != observations.size()-1) {
+                if (i != observations.size() - 1) {
                     observationsText += (observations.get(i) + ", ");
                 } else {
                     observationsText += (observations.get(i) + ". ");
                 }
             }
-            
+
             System.err.println(observationsText);
             finalString = "Cell: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: " + observationsText;
 
