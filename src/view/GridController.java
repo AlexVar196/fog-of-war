@@ -209,7 +209,6 @@ public class GridController implements Serializable {
     }
 
     private void updatePiecesProbability(Cell[][] board) {
-
         for (int row = 0; row < Constants.GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
                 Cell currCell = board[row][col];
@@ -255,6 +254,23 @@ public class GridController implements Serializable {
                             }
                         }
 
+                        if (currCell.isBreeze()) {
+                            List<Double> probabilities = new ArrayList<>();
+                            double numOfPitsPerRow = ((Constants.GRID_SIZE / 3) - 1);
+                            for (int i = 1; i <= numOfPitsPerRow; i++) {
+                                probabilities.add(1.0 / numOfEmptyCells);
+                            }
+
+                            double p = 0;
+                            for (double probability : probabilities) {
+                                p += probability;
+                            }
+                            p = p / probabilities.size();
+                            for (Cell cell : surroundingCells) {
+                                cell.updatePP(p);
+                            }
+                        }
+
                         if (currCell.isHeat()) {
                             List<Double> probabilities = new ArrayList<>();
                             for (int i = 1; i <= enemyMages; i++) {
@@ -277,7 +293,7 @@ public class GridController implements Serializable {
     }
 
     private void updatePitProbability(Cell[][] board) {
-        for (int row = 0; row < Constants.GRID_SIZE; row++) {
+        for (int row = 1; row < Constants.GRID_SIZE-1; row++) {
             List<Cell> emptyCellsInRow = new ArrayList<>();
             for (int col = 0; col < GRID_SIZE; col++) {
                 Cell currCell = board[row][col];
@@ -402,16 +418,6 @@ public class GridController implements Serializable {
         refreshGrid();
     }
 
-    private void diplayBoardLogs() {
-        Cell[][] board = grid.getGrid();
-        for (int row = 0; row < Constants.GRID_SIZE; row++) {
-            for (int col = 0; col < GRID_SIZE; col++) {
-                Cell currCell = board[row][col];
-                System.out.println("Cell " + currCell.getCoords().toString() + "\nstench: " + currCell.isStench() + "\nnoise: " + currCell.isNoise() + "\nheat: " + currCell.isHeat() + "\nbreeze: " + currCell.isBreeze() + "\n\n");
-            }
-        }
-    }
-
     @FXML
     public void submitMove() {
         String[] input = inputTextField.getText().toLowerCase().trim().split(" ");
@@ -443,22 +449,24 @@ public class GridController implements Serializable {
                         submitButton.setDisable(true);
                         return;
                     }
-                    int alpha = Integer.MIN_VALUE;
-                    int beta = Integer.MAX_VALUE;
+                    //int alpha = Integer.MIN_VALUE;
+                    //int beta = Integer.MAX_VALUE;
 
                     Cell[][] oldState = grid.getGrid();
                     long startTime2 = System.nanoTime();
                     //State bestMoveMiniMax = grid.minimax(grid.getGrid(), 0, Constants.MAX_DEPTH, true);
-                    State bestMoveAlphaBeta = grid.alphaBetaMiniMax(grid.getGrid(), 0, alpha, beta, Constants.MAX_DEPTH, true);
+                    //State bestMoveAlphaBeta = grid.alphaBetaMiniMax(grid.getGrid(), 0, alpha, beta, Constants.MAX_DEPTH, true);
+                    State bestMoveWithProbabilities = grid.findBestMove(grid.getGrid());
                     long stopTime2 = System.nanoTime();
                     long durationAlphaBeta = stopTime2 - startTime2;
                     System.out.println("Execution time with depth " + Constants.MAX_DEPTH + ": " + TimeUnit.MILLISECONDS.convert(durationAlphaBeta, TimeUnit.NANOSECONDS) + " miliseconds");
                     //Cell[][] newState = bestMoveMiniMax.state;
-                    Cell[][] newState = bestMoveAlphaBeta.state;
+                    Cell[][] newState = bestMoveWithProbabilities.state;
                     grid.setGrid(newState);
                     String move = findComputerMove(oldState, newState);
                     output += move;
                     outputTextArea.setText(output);
+                    resetProbabilities();
                     refreshGrid();
                     if (grid.isTerminalState(grid.getGrid())) {
                         gameStatusLabel.setText(grid.getGameStatus());
@@ -490,7 +498,6 @@ public class GridController implements Serializable {
             for (int j = 0; j < GRID_SIZE; j++) {
                 if (state[i][j].getPiece() != null && state[i][j].getPiece().isPlayer() == false) {
                     arr.add(String.valueOf((char) (i + 65)) + "" + (j + 1));
-
                 }
             }
         }
@@ -502,29 +509,22 @@ public class GridController implements Serializable {
         switch (pieceType) {
             case 'w':
                 for (Cell cell : surroundingCells) {
-                    System.out.println("cell " + cell.getCoords().toString() + " Trying to add stentch");
                     cell.setIsStench(true);
-                    System.out.println("Result at " + cell.getCoords().toString() + ": " + cell.isStench());
-
                 }
                 break;
             case 'h':
                 for (Cell cell : surroundingCells) {
                     cell.setIsNoise(true);
-                    System.out.println("cell " + cell.getCoords().toString() + " now has Noise");
                 }
                 break;
             case 'm':
                 for (Cell cell : surroundingCells) {
                     cell.setIsHeat(true);
-                    System.out.println("cell " + cell.getCoords().toString() + " now has Heat");
                 }
                 break;
             case 'p':
                 for (Cell cell : surroundingCells) {
-                    System.out.println("cell " + cell.getCoords().toString() + " Trying to add breeze");
                     cell.setIsBreeze(true);
-                    System.out.println("Result at " + cell.getCoords().toString() + ": " + cell.isBreeze());
                 }
                 break;
         }
@@ -535,28 +535,22 @@ public class GridController implements Serializable {
         switch (pieceType) {
             case 'w':
                 for (Cell cell : surroundingCells) {
-                    System.out.println("cell " + cell.getCoords().toString() + " Trying to add stentch");
                     cell.setIsCPUStench(true);
-                    System.out.println("Result at " + cell.getCoords().toString() + ": " + cell.isStench());
                 }
                 break;
             case 'h':
                 for (Cell cell : surroundingCells) {
                     cell.setIsCPUNoise(true);
-                    System.out.println("cell " + cell.getCoords().toString() + " now has Noise");
                 }
                 break;
             case 'm':
                 for (Cell cell : surroundingCells) {
                     cell.setIsCPUHeat(true);
-                    System.out.println("cell " + cell.getCoords().toString() + " now has Heat");
                 }
                 break;
             case 'p':
                 for (Cell cell : surroundingCells) {
-                    System.out.println("cell " + cell.getCoords().toString() + " Trying to add breeze");
                     cell.setIsCPUBreeze(true);
-                    System.out.println("Result at " + cell.getCoords().toString() + ": " + cell.isCPUBreeze());
                 }
                 break;
         }

@@ -165,6 +165,35 @@ public class Grid {
         return computerPieces - playerPieces;
     }
 
+    public int getSipmleHeuristicValue(Cell[][] state) {
+        double myScore = 0;
+        double enemyScore = 0;
+
+        if (isTerminalState(state)) {
+            String gameStatus = getGameStatus(state);
+            if (gameStatus.equals("Player Wins!")) {
+                return -1000;
+            } else if (gameStatus.equals("CPU Wins!")) {
+                return 1000;
+            }
+        }
+
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                if (state[i][j].getPiece() != null) {
+                    if (state[i][j].getPiece().isPlayer()) {
+                        myScore++;
+                    } else {
+                        enemyScore++;
+                    }
+
+                }
+            }
+        }
+
+        return (int) (enemyScore - myScore);
+    }
+
     public int getAdvancedHeuristicValue(Cell[][] state) {
         int myWumps = 0;
         int enemyWumps = 0;
@@ -335,6 +364,103 @@ public class Grid {
             }
         }
         return allPossibleMoves;
+    }
+
+    public Cell[][] computeProbabilityState(Cell[][] state) {
+        Cell[][] computedProbabilityState = new Cell[GRID_SIZE][GRID_SIZE];
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                if (state[i][j].getPiece() != null && !state[i][j].getPiece().isPlayer()) {
+                    if (state[i][j].getPiece() instanceof Wumpus) {
+                        computedProbabilityState[i][j].setPiece(new Wumpus(false));
+                    }
+                    if (state[i][j].getPiece() instanceof Hero) {
+                        computedProbabilityState[i][j].setPiece(new Hero(false));
+                    }
+                    if (state[i][j].getPiece() instanceof Mage) {
+                        computedProbabilityState[i][j].setPiece(new Mage(false));
+                    }
+                } else {
+                    char piece = getPieceFromProbability(state[i][j]);
+                    switch (piece) {
+                        case 'e':
+                            break;
+                        case 'w':
+                            computedProbabilityState[i][j].setPiece(new Wumpus(true));
+                            break;
+                        case 'h':
+                            computedProbabilityState[i][j].setPiece(new Hero(true));
+                            break;
+                        case 'm':
+                            computedProbabilityState[i][j].setPiece(new Mage(true));
+                            break;
+                        case 'p':
+                            computedProbabilityState[i][j].setIsPit(true);
+                            break;
+                    }
+
+                }
+            }
+        }
+
+        return computedProbabilityState;
+    }
+
+    private char getPieceFromProbability(Cell currCell) {
+        double highestProbability = 0;
+        char piece = 'e';
+        double pW = currCell.getPW();
+        double pH = currCell.getPH();
+        double pM = currCell.getPM();
+        double pP = currCell.getPP();
+        if (pW > highestProbability) {
+            //piece = new Wumpus(true);
+            piece = 'w';
+        }
+        if (pH > highestProbability) {
+            highestProbability = pH;
+            piece = 'h';
+        }
+        if (pM > highestProbability) {
+            highestProbability = pM;
+            piece = 'm';
+        }
+
+        if (pP > highestProbability) {
+            highestProbability = pP;
+            piece = 'p';
+        }
+
+        if (highestProbability == 0) {
+            piece = 'e';
+        }
+
+        return piece;
+    }
+
+    public State findBestMove(Cell[][] state) {
+        List<Cell[][]> allPossibleStates = new ArrayList<>();
+        State bestState = new State(Integer.MIN_VALUE, null);
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                if (state[i][j].getPiece() != null && !state[i][j].getPiece().isPlayer()) {
+                    allPossibleStates.addAll(getAllPossibleMoves(state, i, j));
+                }
+            }
+        }
+
+        int bestHValue = Integer.MIN_VALUE;
+        for (Cell[][] possibleState : allPossibleStates) {
+            //Cell[][] convertedState = computeProbabilityState(possibleState);
+            int hValue = getSipmleHeuristicValue(possibleState);
+            //System.out.println(hValue);
+            if (hValue > bestHValue) {
+                bestHValue = hValue;
+                bestState = new State(hValue, possibleState);
+            }
+        }
+
+        return bestState;
     }
 
     public State minimax(Cell[][] node, int depth, int maxDepth, boolean isMaxPlayer) {
