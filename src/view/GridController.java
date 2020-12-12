@@ -167,12 +167,8 @@ public class GridController implements Serializable {
             }
         }
         double numOfPits = ((Constants.GRID_SIZE / 3) - 1) * (GRID_SIZE - 2);
-        System.out.println("view.GridController.updatePitProbability() pits " + numOfPits);
         double numberOfEmptyCells = nonPlayerCells.size();
-        System.out.println("view.GridController.updatePitProbability() numberOfEmptyCells " + numberOfEmptyCells);
         double p = (numOfPits / numberOfEmptyCells) * 100;
-
-        System.out.println("view.GridController.updatePitProbability() p " + p);
 
         BigDecimal bd = new BigDecimal(p).setScale(3, RoundingMode.HALF_UP);
         double roundedP = bd.doubleValue();
@@ -182,56 +178,88 @@ public class GridController implements Serializable {
         }
     }
 
+    private String getCellObservations(Cell currCell) {
+        int col = currCell.getCoords().getColumn();
+        int row = currCell.getCoords().getRow();
+        String stench = "";
+        String noise = "";
+        String heat = "";
+        String breeze = "";
+        Boolean changed = false;
+        String finalString = "";
+
+        if (currCell.isStench()) {
+            stench = "Stench, ";
+            changed = true;
+        }
+        if (currCell.isNoise()) {
+            noise = "Noise, ";
+            changed = true;
+        }
+        if (currCell.isHeat()) {
+            heat = "Heat, ";
+            changed = true;
+        }
+        if (currCell.isBreeze()) {
+            breeze = "Breeze, ";
+            changed = true;
+        }
+
+        if (changed) {
+            finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: " + stench + noise + heat + breeze;
+
+        } else {
+            if (currCell.getPiece() != null && !currCell.getPiece().isPlayer()) {
+                finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None\nEmpty Cell: 100%";
+            } else {
+                finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None";
+            }
+        }
+        return finalString;
+    }
+
+    private String getProbabilityText(Cell currCell) {
+        String probabilityText = "";
+        if (currCell.getPiece() != null && currCell.getPiece().isPlayer()) {
+            probabilityText = probabilityText + "\nThat's our unit";
+        } else {
+            probabilityText = probabilityText + "\nPW: " + currCell.getPW() + "%";
+            probabilityText = probabilityText + "\nPH: " + currCell.getPH() + "%";
+            probabilityText = probabilityText + "\nPM: " + currCell.getPM() + "%";
+            probabilityText = probabilityText + "\nPP: " + currCell.getPP() + "%";
+        }
+        return probabilityText;
+    }
+
     private void updateToolTip(Cell[][] board) {
         for (int row = 0; row < Constants.GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
                 Cell currCell = board[row][col];
-                String stench = "";
-                String noise = "";
-                String heat = "";
-                String breeze = "";
-                Boolean changed = false;
-                String finalString = "";
-
-                if (currCell.isStench()) {
-                    stench = "Stench, ";
-                    changed = true;
-                }
-                if (currCell.isNoise()) {
-                    noise = "Noise, ";
-                    changed = true;
-                }
-                if (currCell.isHeat()) {
-                    heat = "Heat, ";
-                    changed = true;
-                }
-                if (currCell.isBreeze()) {
-                    breeze = "Breeze, ";
-                    changed = true;
-                }
-
-                if (changed) {
-                    finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: " + stench + noise + heat + breeze;
-
-                } else {
-                    if (currCell.getPiece() != null && !currCell.getPiece().isPlayer()) {
-                        finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None\nEmpty Cell: 100%";
-                    } else {
-                        finalString = "Move: " + String.valueOf((char) (col + 65)) + "-" + (row + 1) + "\nObservations: None";
-                    }
-                }
 
                 if (currCell.getPiece() != null && currCell.getPiece().isPlayer()) {
-                    finalString = finalString + "\nThat's our unit";
-                } else {
-                    finalString = finalString + "\nPW: " + currCell.getPW() + "%";
-                    finalString = finalString + "\nPH: " + currCell.getPH() + "%";
-                    finalString = finalString + "\nPM: " + currCell.getPM() + "%";
-                    finalString = finalString + "\nPP: " + currCell.getPP() + "%";
-                }
-                Tooltip toolTip = new Tooltip(finalString);
-                Tooltip.install(currCell, toolTip);
+                    String observationText = getCellObservations(currCell);
+                    Tooltip toolTip = new Tooltip(observationText);
+                    Tooltip.install(currCell, toolTip);
 
+                    var surroundingCells = getSurroundingCells(board, currCell);
+                    for (Cell cell : surroundingCells) {
+                        String surroundingObservationText = getCellObservations(cell);
+                        String surroundingProbabilityText = getProbabilityText(cell);
+                        String finalTooltipText = surroundingObservationText + surroundingProbabilityText;
+
+                        System.out.println(finalTooltipText);
+
+                        Tooltip surroundingToolTip = new Tooltip(finalTooltipText);
+                        Tooltip.install(cell, surroundingToolTip);
+                    }
+                } else {
+                    String observationText = "Observation out of sight";
+                    String probabilityText = getProbabilityText(currCell);
+                    String finalTooltipText = observationText + probabilityText;
+
+                    Tooltip toolTip = new Tooltip(finalTooltipText);
+                    Tooltip.install(currCell, toolTip);
+                }
             }
         }
     }
